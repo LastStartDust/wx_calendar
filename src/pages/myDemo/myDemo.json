@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "小历-使用demo",
+  "usingComponents": {
+    "calendar": "../../component/calendar/index"
+  }
+}

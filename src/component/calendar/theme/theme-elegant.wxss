@@ -6,8 +6,8 @@
 }
 
 .elegant_choosed {
-    color: #000;
-    background-color: #e2e2e2;
+    color: #fff !important;
+    background-color: #4B7EFB;
 }
 
 .elegant_date-disable {

@@ -1,15 +1,15 @@
-const conf = {
+Page({
   data: {
     calendarConfig: {
-      showLunar: true,
+      defaultDay: false, // 初始化时不默认选中当天
+      showLunar: true, // 显示农历
+      multi: true, // 多选
+      disablePastDay: true, // 是否禁选过去的日期
+      onlyShowCurrentMonth: true, // 日历面板是否只显示本月日期
+      hideHeadOnWeekMode: true, // 周视图模式是否隐藏日历头部
       theme: 'elegant'
     },
     actionBtn: [
-      {
-        text: '跳转指定日期',
-        action: 'jump',
-        color: 'olive'
-      },
       {
         text: '获取当前已选',
         action: 'getSelectedDay',
@@ -19,26 +19,6 @@ const conf = {
         text: '取消所有选中',
         action: 'cancelAllSelectedDay',
         color: 'mauve'
-      },
-      {
-        text: '设置待办事项',
-        action: 'setTodoLabels',
-        color: 'cyan'
-      },
-      {
-        text: '删除指定代办',
-        action: 'deleteTodoLabels',
-        color: 'pink'
-      },
-      {
-        text: '清空待办事项',
-        action: 'clearTodoLabels',
-        color: 'red'
-      },
-      {
-        text: '获取所有代办',
-        action: 'getTodoLabels',
-        color: 'purple'
       },
       {
         text: '禁选指定日期',
@@ -84,9 +64,6 @@ const conf = {
   whenChangeMonth(e) {
     console.log('whenChangeMonth', e.detail);
   },
-  whenChangeWeek(e) {
-    console.log('whenChangeWeek', e.detail);
-  },
   onTapDay(e) {
     console.log('onTapDay', e.detail);
   },
@@ -122,7 +99,10 @@ const conf = {
     return random;
   },
   handleAction(e) {
-    const { action, disable } = e.currentTarget.dataset;
+    const {
+      action,
+      disable
+    } = e.currentTarget.dataset;
     if (disable) {
       this.showToast('抱歉，还不支持～😂');
     }
@@ -130,69 +110,73 @@ const conf = {
       rst: []
     });
     const calendar = this.calendar;
-    const { year, month } = calendar.getCurrentYM();
+    const {
+      year,
+      month
+    } = calendar.getCurrentYM();
     switch (action) {
       case 'config':
         break;
-      case 'jump': {
-        const year = this.generateRandomDate('year');
-        const month = this.generateRandomDate('month');
-        const date = this.generateRandomDate('date');
-        calendar[action](year, month, date);
-        break;
-      }
-      case 'getSelectedDay': {
-        const selected = calendar[action]();
-        if (!selected || !selected.length)
-          return this.showToast('当前未选择任何日期');
-        console.log('get selected days: ', selected);
-        const rst = selected.map(item => JSON.stringify(item));
-        this.setData({
-          rst
-        });
-        break;
-      }
+      case 'jump':
+        {
+          const year = this.generateRandomDate('year');
+          const month = this.generateRandomDate('month');
+          const date = this.generateRandomDate('date');
+          calendar[action](year, month, date);
+          break;
+        }
+      case 'getSelectedDay':
+        {
+          const selected = calendar[action]();
+          if (!selected || !selected.length)
+            return this.showToast('当前未选择任何日期');
+          console.log('get selected days: ', selected);
+          const rst = selected.map(item => JSON.stringify(item));
+          this.setData({
+            rst
+          });
+          break;
+        }
       case 'cancelAllSelectedDay':
         calendar[action]();
         break;
-      case 'setTodoLabels': {
-        const days = [
-          {
+      case 'setTodoLabels':
+        {
+          const days = [{
             year,
             month,
             day: this.generateRandomDate('date'),
             todoText: Math.random() * 10 > 5 ? '领奖日' : ''
-          }
-        ];
-        calendar[action]({
-          showLabelAlways: true,
-          days
-        });
-        console.log('set todo labels: ', days);
-        break;
-      }
-      case 'deleteTodoLabels': {
-        const todos = [...calendar.getTodoLabels()];
-        if (todos && todos.length) {
-          todos.length = 1;
-          calendar[action](todos);
-          const _todos = [...calendar.getTodoLabels()];
-          setTimeout(() => {
-            const rst = _todos.map(item => JSON.stringify(item));
-            this.setData(
-              {
-                rst
-              },
-              () => {
-                console.log('set todo labels: ', todos);
-              }
-            );
+          }];
+          calendar[action]({
+            showLabelAlways: true,
+            days
           });
-        } else {
-          this.showToast('没有待办事项');
+          console.log('set todo labels: ', days);
+          break;
         }
-        break;
-      }
+      case 'deleteTodoLabels':
+        {
+          const todos = [...calendar.getTodoLabels()];
+          if (todos && todos.length) {
+            todos.length = 1;
+            calendar[action](todos);
+            const _todos = [...calendar.getTodoLabels()];
+            setTimeout(() => {
+              const rst = _todos.map(item => JSON.stringify(item));
+              this.setData({
+                  rst
+                },
+                () => {
+                  console.log('set todo labels: ', todos);
+                }
+              );
+            });
+          } else {
+            this.showToast('没有待办事项');
+          }
+          break;
+        }
       case 'clearTodoLabels':
         const todos = [...calendar.getTodoLabels()];
         if (!todos || !todos.length) {
@@ -200,39 +184,39 @@ const conf = {
         }
         calendar[action]();
         break;
-      case 'getTodoLabels': {
-        const selected = calendar[action]();
-        if (!selected || !selected.length)
-          return this.showToast('未设置待办事项');
-        const rst = selected.map(item => JSON.stringify(item));
-        rst.map(item => JSON.stringify(item));
-        this.setData({
-          rst
-        });
-        break;
-      }
-      case 'disableDay':
-        calendar[action]([
-          {
-            year,
-            month,
-            day: this.generateRandomDate('date')
-          }
-        ]);
-        break;
-      case 'enableArea': {
-        let sDate = this.generateRandomDate('date');
-        let eDate = this.generateRandomDate('date');
-        if (sDate > eDate) {
-          [eDate, sDate] = [sDate, eDate];
+      case 'getTodoLabels':
+        {
+          const selected = calendar[action]();
+          if (!selected || !selected.length)
+            return this.showToast('未设置待办事项');
+          const rst = selected.map(item => JSON.stringify(item));
+          rst.map(item => JSON.stringify(item));
+          this.setData({
+            rst
+          });
+          break;
         }
-        const area = [`${year}-${month}-${sDate}`, `${year}-${month}-${eDate}`];
-        calendar[action](area);
-        this.setData({
-          rstStr: JSON.stringify(area)
-        });
+      case 'disableDay':
+        calendar[action]([{
+          year,
+          month,
+          day: this.generateRandomDate('date')
+        }]);
         break;
-      }
+      case 'enableArea':
+        {
+          let sDate = this.generateRandomDate('date');
+          let eDate = this.generateRandomDate('date');
+          if (sDate > eDate) {
+            [eDate, sDate] = [sDate, eDate];
+          }
+          const area = [`${year}-${month}-${sDate}`, `${year}-${month}-${eDate}`];
+          calendar[action](area);
+          this.setData({
+            rstStr: JSON.stringify(area)
+          });
+          break;
+        }
       case 'enableDays':
         const days = [
           `${year}-${month}-${this.generateRandomDate('date')}`,
@@ -256,8 +240,7 @@ const conf = {
         }
         break;
       case 'setSelectedDays':
-        const toSet = [
-          {
+        const toSet = [{
             year,
             month,
             day: this.generateRandomDate('date')
@@ -278,6 +261,4 @@ const conf = {
         break;
     }
   }
-};
-
-Page(conf);
+});
