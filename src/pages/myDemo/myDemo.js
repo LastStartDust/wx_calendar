@@ -6,7 +6,6 @@ Page({
       multi: true, // 多选
       disablePastDay: true, // 是否禁选过去的日期
       onlyShowCurrentMonth: true, // 日历面板是否只显示本月日期
-      hideHeadOnWeekMode: true, // 周视图模式是否隐藏日历头部
       theme: 'elegant'
     },
     actionBtn: [
